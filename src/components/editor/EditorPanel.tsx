@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Editor, { loader, type BeforeMount, type OnMount } from '@monaco-editor/react'
-import { Check, Copy, FileCode2 } from 'lucide-react'
+import { Check, Copy, Download, FileCode2 } from 'lucide-react'
 import * as monaco from 'monaco-editor/editor/editor.api'
 import type { editor } from 'monaco-editor'
 import EditorWorker from 'monaco-editor/editor/editor.worker.js?worker'
@@ -119,6 +119,20 @@ export default function EditorPanel({ error }: Props) {
     copyTimeout.current = window.setTimeout(() => setCopyState('idle'), 2000)
   }
 
+  function downloadYaml() {
+    const metadata = error ? null : source.match(/metadata:\s*\n\s*name:\s*"?([^\n"]+)"?/)
+    const name = metadata?.[1]?.trim().replace(/[^a-z0-9_-]/gi, '-') || 'architecture'
+    const blob = new Blob([source], { type: 'text/yaml;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${name}.aal.yaml`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+
   const onMount: OnMount = (instance) => {
     editorRef.current = instance
     decorationsRef.current = instance.createDecorationsCollection()
@@ -148,6 +162,15 @@ export default function EditorPanel({ error }: Props) {
           title="Copy YAML"
         >
           {copyState === 'copied' ? <Check size={15} /> : <Copy size={15} />}
+        </button>
+        <button
+          className="editor-copy-button"
+          type="button"
+          onClick={() => void downloadYaml()}
+          aria-label="Download YAML file"
+          title="Download YAML"
+        >
+          <Download size={15} />
         </button>
       </div>
       <div className="editor-body">
