@@ -23,6 +23,7 @@
   --accent: #60a5fa;
   --accent-soft: #172843;
   --canvas-grid: #273047;
+  --error-text: #fca5a5;
 }
 
 :root[data-theme='light'] {
@@ -35,6 +36,7 @@
   --accent: #2563eb;
   --accent-soft: #e8f0ff;
   --canvas-grid: #cdd6e5;
+  --error-text: #b91c1c;
 }
 
 body {

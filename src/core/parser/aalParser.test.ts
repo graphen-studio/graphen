@@ -66,6 +66,12 @@ describe('parseAal', () => {
 
   it('reports syntax errors with a line number', () => {
     expect(() => parseAal('metadata: [\n')).toThrow(/Line \d+, column \d+/)
+    try {
+      parseAal('metadata: [\n')
+    } catch (error) {
+      expect(error).toBeInstanceOf(AalParseError)
+      expect((error as AalParseError).location).toEqual({ line: 2, column: 1 })
+    }
   })
 
   it('reports broken model, component, group and topology references', () => {

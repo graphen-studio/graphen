@@ -11,11 +11,11 @@ npm ci
 npm run dev
 ```
 
-Run `npm run lint`, `npm test`, and `npm run build` to check the project. The landing page is at `/graphen/`; the Studio is at `/graphen/studio/`. The Studio shows the versioned sample in `src/assets/sample.aal.yaml` on an interactive canvas with dark/light themes. Click a component to inspect its metadata. The arrows in the canvas header change the automatic layout direction without changing the YAML; the preference is saved locally. YAML editing is planned for a later phase.
+Run `npm run lint`, `npm test`, and `npm run build` to check the project. The landing page is at `/graphen/`; the Studio is at `/graphen/studio/`. The Monaco editor starts with the sample in `src/assets/sample.aal.yaml` and saves edits locally. Valid YAML updates the canvas after 300 ms; errors appear in the editor while the canvas keeps the last valid architecture, including after a refresh. Copy the YAML from the editor header or hide the editor to give the canvas more room. Click a component to inspect its metadata. The arrows change the layout direction without modifying the YAML. The canvas can be exported as PNG (2× resolution) or SVG.
 
 ## AAL core
 
-`parseAal(source)` in `src/core/parser/aalParser.ts` parses YAML, validates the schema and references, and throws `AalParseError` with readable issues on failure. `transformAalToGraph(document)` in `src/core/parser/graphTransformer.ts` maps a validated document to laid-out React Flow nodes and edges. Use `.aal.yaml` for AAL files; the parser accepts YAML text regardless of the filename. Integration with the editor and custom node rendering comes in later phases.
+`parseAal(source)` in `src/core/parser/aalParser.ts` parses YAML, validates the schema and references, and throws `AalParseError` with readable issues on failure. `transformAalToGraph(document)` in `src/core/parser/graphTransformer.ts` maps a validated document to laid-out React Flow nodes and edges. Use `.aal.yaml` for AAL files; the parser accepts YAML text regardless of the filename.
 
 ## Deployment
 

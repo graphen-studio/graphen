@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import sampleSource from '../assets/sample.aal.yaml?raw'
 import type { LayoutDirection } from '../core/types/graph'
 
 type Theme = 'dark' | 'light'
@@ -6,8 +7,10 @@ type Theme = 'dark' | 'light'
 type StudioState = {
   theme: Theme
   layoutDirection: LayoutDirection
+  source: string
   toggleTheme: () => void
   setLayoutDirection: (direction: LayoutDirection) => void
+  setSource: (source: string) => void
 }
 
 const storedTheme = localStorage.getItem('graphen-theme')
@@ -20,6 +23,11 @@ const initialDirection: LayoutDirection = storedDirection === 'RL' || storedDire
 export const useStudioStore = create<StudioState>((set) => ({
   theme: initialTheme,
   layoutDirection: initialDirection,
+  source: localStorage.getItem('graphen-source') ?? sampleSource,
+  setSource: (source) => {
+    localStorage.setItem('graphen-source', source)
+    set({ source })
+  },
   setLayoutDirection: (direction) => {
     localStorage.setItem('graphen-layout-direction', direction)
     set({ layoutDirection: direction })
