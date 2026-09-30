@@ -9,8 +9,8 @@ export function EditorPanel() {
       </div>
       <div className="editor-placeholder">
         <FileCode2 size={32} strokeWidth={1.5} />
-        <h1>Build your architecture</h1>
-        <p>The AAL editor will appear here in a future phase.</p>
+        <h1>Explore the sample architecture</h1>
+        <p>Select a component on the canvas to inspect its details. The AAL editor is coming in the next phase.</p>
       </div>
     </section>
   )

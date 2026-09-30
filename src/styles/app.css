@@ -112,10 +112,55 @@ button:focus-visible {
   justify-content: space-between;
 }
 
+.canvas-heading > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.canvas-heading-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 14px;
+}
+
 .canvas-status {
   color: var(--accent);
   font-size: 12px;
   font-weight: 400;
+}
+
+.direction-switcher {
+  display: flex;
+  padding: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+.direction-button {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  cursor: pointer;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+}
+
+.direction-button:hover { color: var(--text); }
+
+.direction-button[aria-pressed='true'] {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+@media (max-width: 1050px) {
+  .canvas-status { display: none; }
 }
 
 .editor-placeholder {
@@ -129,16 +174,14 @@ button:focus-visible {
   text-align: center;
 }
 
-.editor-placeholder h1,
-.canvas-placeholder h2 {
+.editor-placeholder h1 {
   margin: 16px 0 6px;
   color: var(--text);
   font-size: 16px;
   font-weight: 600;
 }
 
-.editor-placeholder p,
-.canvas-placeholder p {
+.editor-placeholder p {
   max-width: 300px;
   margin: 0;
   font-size: 13px;
@@ -156,27 +199,17 @@ button:focus-visible {
   background: var(--surface);
 }
 
-.canvas-placeholder {
+.canvas-navigation-hint {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(90%, 340px);
-  transform: translate(-50%, -50%);
+  right: 16px;
+  bottom: 16px;
+  padding: 7px 10px;
   pointer-events: none;
   color: var(--muted);
-  text-align: center;
-}
-
-.canvas-placeholder-icon {
-  display: inline-grid;
-  width: 52px;
-  height: 52px;
-  place-items: center;
-  color: var(--accent);
-  background: var(--accent-soft);
+  background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  font-size: 28px;
+  border-radius: 7px;
+  font-size: 11px;
 }
 
 .node-details {
@@ -219,13 +252,21 @@ button:focus-visible {
 }
 
 .details-type {
+  --detail-color: var(--color-graphen-agent);
   display: inline-block;
   padding: 4px 8px;
-  color: var(--accent);
-  background: var(--accent-soft);
+  color: var(--detail-color);
+  background: color-mix(in srgb, var(--detail-color) 14%, transparent);
   border-radius: 5px;
   font-size: 12px;
+  text-transform: capitalize;
 }
+
+.details-type-mcp { --detail-color: var(--color-graphen-mcp); }
+.details-type-memory { --detail-color: var(--color-graphen-memory); }
+.details-type-tool { --detail-color: var(--color-graphen-tool); }
+.details-type-guardrail { --detail-color: var(--color-graphen-guardrail); }
+.details-type-condition, .details-type-action { --detail-color: var(--color-graphen-logic); }
 
 .details-close {
   display: grid;
@@ -274,9 +315,35 @@ button:focus-visible {
   white-space: pre-wrap;
 }
 
+.details-object {
+  margin: 0;
+  padding: 4px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+.details-object > div {
+  padding: 7px 0;
+}
+
+.details-object > div + div {
+  border-top: 1px solid var(--border);
+}
+
+.details-object dd {
+  margin: 0;
+}
+
 .details-empty {
   color: var(--muted);
   font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edge-particle {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {
