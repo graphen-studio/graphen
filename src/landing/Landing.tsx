@@ -79,7 +79,7 @@ export default function Landing() {
               <a className="primary-link" href={`${base}studio/`}>Explore the Studio <ArrowRight size={18} aria-hidden="true" /></a>
               <a className="secondary-link" href="https://github.com/pavanad/graphen" target="_blank" rel="noopener noreferrer">View on GitHub <ArrowUpRight size={17} aria-hidden="true" /></a>
             </div>
-            <p className="availability"><span /> Studio foundation is live. AAL editing and rendering are in development.</p>
+            <p className="availability"><span /> The Studio is live. Write AAL and explore your architecture.</p>
           </div>
           <div className="hero-visual"><Preview /></div>
         </section>

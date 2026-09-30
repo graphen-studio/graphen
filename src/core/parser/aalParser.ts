@@ -3,11 +3,13 @@ import { aalSchema, type AalAgent, type AalDocument, type AalModel } from '../ty
 
 export class AalParseError extends Error {
   readonly issues: string[]
+  readonly location?: { line: number; column: number }
 
-  constructor(issues: string[]) {
+  constructor(issues: string[], location?: { line: number; column: number }) {
     super(issues.join('\n'))
     this.name = 'AalParseError'
     this.issues = issues
+    this.location = location
   }
 }
 
@@ -18,8 +20,11 @@ export function parseAal(source: string): AalDocument {
     value = yaml.load(source)
   } catch (error) {
     if (error instanceof yaml.YAMLException) {
-      const location = error.mark ? `Line ${error.mark.line + 1}, column ${error.mark.column + 1}` : 'YAML'
-      throw new AalParseError([`${location}: ${error.reason}`])
+      const location = error.mark
+        ? { line: error.mark.line + 1, column: error.mark.column + 1 }
+        : undefined
+      const prefix = location ? `Line ${location.line}, column ${location.column}` : 'YAML'
+      throw new AalParseError([`${prefix}: ${error.reason}`], location)
     }
     throw error
   }

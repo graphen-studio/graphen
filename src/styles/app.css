@@ -88,11 +88,26 @@ button:focus-visible {
 
 .editor-panel {
   width: 32%;
+  flex: none;
+  overflow: hidden;
   border-right: 1px solid var(--border);
+  transition: width 280ms ease, height 280ms ease, visibility 280ms;
 }
 
 .canvas-panel {
   width: 68%;
+  flex: none;
+  transition: width 280ms ease, height 280ms ease;
+}
+
+.workspace.editor-hidden .editor-panel {
+  width: 0;
+  visibility: hidden;
+  border-right: 0;
+}
+
+.workspace.editor-hidden .canvas-panel {
+  width: 100%;
 }
 
 .panel-heading {
@@ -123,13 +138,32 @@ button:focus-visible {
   display: flex;
   flex: none;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .canvas-status {
   color: var(--accent);
   font-size: 12px;
   font-weight: 400;
+}
+
+.panel-toggle,
+.editor-copy-button {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  flex: none;
+  place-items: center;
+  cursor: pointer;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.panel-toggle:hover,
+.editor-copy-button:hover {
+  color: var(--accent);
 }
 
 .direction-switcher {
@@ -159,33 +193,96 @@ button:focus-visible {
   background: var(--accent-soft);
 }
 
+.export-actions {
+  display: flex;
+  gap: 3px;
+}
+
+.export-actions button {
+  padding: 6px 7px;
+  cursor: pointer;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 10px;
+}
+
+.export-actions button:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.export-actions button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
 @media (max-width: 1050px) {
   .canvas-status { display: none; }
 }
 
-.editor-placeholder {
-  display: flex;
+.editor-body {
   flex: 1;
-  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.editor-heading > span:nth-child(2) {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.copy-feedback {
+  flex: none;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.copy-feedback:empty { display: none; }
+
+.editor-status {
+  flex: none;
+  margin-left: auto;
+  color: var(--color-graphen-memory);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.editor-status.is-error { color: #f87171; }
+:root[data-theme='light'] .editor-status.is-error { color: var(--error-text); }
+
+.editor-loading {
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
+  height: 100%;
   color: var(--muted);
-  text-align: center;
-}
-
-.editor-placeholder h1 {
-  margin: 16px 0 6px;
-  color: var(--text);
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.editor-placeholder p {
-  max-width: 300px;
-  margin: 0;
   font-size: 13px;
-  line-height: 1.6;
+}
+
+.editor-diagnostics {
+  max-height: 110px;
+  flex: none;
+  padding: 10px 16px;
+  overflow-y: auto;
+  color: var(--error-text);
+  background: color-mix(in srgb, #ef4444 9%, var(--panel));
+  border-top: 1px solid color-mix(in srgb, #ef4444 35%, var(--border));
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.editor-diagnostics > div + div { margin-top: 4px; }
+
+.aal-error-glyph::before {
+  content: '●';
+  display: block;
+  color: #ef4444;
+  font-size: 12px;
+  text-align: center;
 }
 
 .canvas-body {
@@ -197,6 +294,32 @@ button:focus-visible {
 
 .canvas-body .react-flow {
   background: var(--surface);
+}
+
+.canvas-empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(90%, 300px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.canvas-export-error {
+  position: absolute;
+  z-index: 6;
+  top: 12px;
+  left: 50%;
+  padding: 9px 12px;
+  transform: translateX(-50%);
+  color: var(--error-text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 12px;
 }
 
 .canvas-navigation-hint {
@@ -365,8 +488,25 @@ button:focus-visible {
     height: 50%;
   }
 
+  .workspace.editor-hidden .canvas-panel {
+    height: 100%;
+  }
+
   .editor-panel {
     border-right: 0;
     border-bottom: 1px solid var(--border);
+  }
+
+  .workspace.editor-hidden .editor-panel {
+    width: 100%;
+    height: 0;
+    border-bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-panel,
+  .canvas-panel {
+    transition: none;
   }
 }
