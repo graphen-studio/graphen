@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import Editor, { loader, type BeforeMount, type OnMount } from '@monaco-editor/react'
-import { Check, Copy, Download, FileCode2 } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Copy, Download, FileCode2 } from 'lucide-react'
 import * as monaco from 'monaco-editor/editor/editor.api'
 import type { editor } from 'monaco-editor'
 import EditorWorker from 'monaco-editor/editor/editor.worker.js?worker'
 import type { AalParseError } from '../../core/parser/aalParser'
 import { useStudioStore } from '../../store/useStudioStore'
+
+import sampleSource from '../../assets/sample.aal.yaml?raw'
+import simpleSource from '../../assets/simple-agent.aal.yaml?raw'
+import ragSource from '../../assets/rag-pipeline.aal.yaml?raw'
+import securitySource from '../../assets/security-gates.aal.yaml?raw'
 
 (self as typeof self & { MonacoEnvironment: { getWorker: () => Worker } }).MonacoEnvironment = {
   getWorker: () => new EditorWorker(),
@@ -97,6 +102,13 @@ function applyDiagnostics(
   }] : [])
 }
 
+const examples = [
+  { id: 'sample', label: 'Support Orchestrator', description: 'Multi-agent support flow', source: sampleSource },
+  { id: 'simple', label: 'Simple Agent', description: 'Single agent with two tools', source: simpleSource },
+  { id: 'rag', label: 'RAG Pipeline', description: 'Retrieval augmented generation', source: ragSource },
+  { id: 'security', label: 'Security Gates', description: 'Approval gates and guardrails', source: securitySource },
+] as const
+
 export default function EditorPanel({ error }: Props) {
   const source = useStudioStore((state) => state.source)
   const setSource = useStudioStore((state) => state.setSource)
@@ -104,9 +116,35 @@ export default function EditorPanel({ error }: Props) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const decorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement | null>(null)
   const copyTimeout = useRef<number | undefined>(undefined)
 
+  const activeId = examples.find((example) => example.source === source)?.id
+
   useEffect(() => () => window.clearTimeout(copyTimeout.current), [])
+
+  useEffect(() => {
+    if (!menuOpen) return
+    function onPointerDown(event: MouseEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false)
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [menuOpen])
+
+  function loadExample(exampleSource: string) {
+    setSource(exampleSource)
+    setCopyState('idle')
+    setMenuOpen(false)
+  }
 
   async function copyYaml() {
     window.clearTimeout(copyTimeout.current)
@@ -172,6 +210,39 @@ export default function EditorPanel({ error }: Props) {
         >
           <Download size={15} />
         </button>
+        <div className="example-picker" ref={menuRef}>
+          <button
+            className="editor-copy-button"
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label="Load example architecture"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            title="Examples"
+          >
+            {menuOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+          </button>
+          {menuOpen && (
+            <div className="example-menu" role="menu">
+              <div className="example-menu-label">Examples</div>
+              {examples.map(({ id, label, description }) => (
+                <button
+                  key={id}
+                  className={`example-menu-item${id === activeId ? ' is-active' : ''}`}
+                  type="button"
+                  role="menuitem"
+                  onClick={() => loadExample(examples.find((item) => item.id === id)!.source)}
+                >
+                  <span className="example-menu-name">
+                    {label}
+                    {id === activeId && <Check size={14} />}
+                  </span>
+                  <span className="example-menu-description">{description}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       <div className="editor-body">
         <Editor
