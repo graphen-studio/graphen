@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="public/logo-text-dark.png" alt="Graphen Studio" width="420">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/logo-text-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="public/logo-text-light.png">
+    <img src="public/logo-text-light.png" alt="Graphen Studio" width="420">
+  </picture>
 </p>
 
 <p align="center">
