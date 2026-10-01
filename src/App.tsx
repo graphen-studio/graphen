@@ -18,7 +18,9 @@ type Draft = {
 
 export default function App() {
   const source = useStudioStore((state) => state.source)
-  const [editorVisible, setEditorVisible] = useState(true)
+  const editorVisible = useStudioStore((state) => state.editorVisible)
+  const toggleEditor = useStudioStore((state) => state.toggleEditor)
+  const [editorReady, setEditorReady] = useState(false)
   const [draft, setDraft] = useState<Draft>(() => {
     try {
       return { document: parseAal(source), error: null, validatedSource: source, validSource: source }
@@ -63,14 +65,21 @@ export default function App() {
       <TopBar />
       <main className={`workspace${editorVisible ? '' : ' editor-hidden'}`}>
         <Suspense fallback={<section className="editor-panel" id="graphen-editor" aria-label="Code editor"><div className="panel-heading">Editor</div><span className="editor-loading">Loading editor…</span></section>}>
-          <EditorPanel error={pending ? null : draft.error} />
+          <EditorPanel error={pending ? null : draft.error} onReady={() => setEditorReady(true)} />
         </Suspense>
-        <CanvasPanel
-          document={draft.document}
-          status={pending ? 'Updating…' : draft.error ? 'Last valid version' : 'Up to date'}
-          editorVisible={editorVisible}
-          onToggleEditor={() => setEditorVisible((visible) => !visible)}
-        />
+        {editorReady ? (
+          <CanvasPanel
+            document={draft.document}
+            status={pending ? 'Updating…' : draft.error ? 'Last valid version' : 'Up to date'}
+            editorVisible={editorVisible}
+            onToggleEditor={toggleEditor}
+          />
+        ) : (
+          <section className="canvas-panel" aria-label="Architecture canvas" aria-busy="true">
+            <div className="panel-heading">Architecture</div>
+            <div className="canvas-loading">Preparing canvas…</div>
+          </section>
+        )}
       </main>
     </div>
   )

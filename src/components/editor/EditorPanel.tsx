@@ -73,7 +73,7 @@ const configureEditor: BeforeMount = (api) => {
   })
 }
 
-type Props = { error: AalParseError | null }
+type Props = { error: AalParseError | null; onReady: () => void }
 
 function applyDiagnostics(
   instance: editor.IStandaloneCodeEditor,
@@ -109,7 +109,7 @@ const examples = [
   { id: 'security', label: 'Security Gates', description: 'Approval gates and guardrails', source: securitySource },
 ] as const
 
-export default function EditorPanel({ error }: Props) {
+export default function EditorPanel({ error, onReady }: Props) {
   const source = useStudioStore((state) => state.source)
   const setSource = useStudioStore((state) => state.setSource)
   const theme = useStudioStore((state) => state.theme)
@@ -175,6 +175,7 @@ export default function EditorPanel({ error }: Props) {
     editorRef.current = instance
     decorationsRef.current = instance.createDecorationsCollection()
     applyDiagnostics(instance, decorationsRef.current, error)
+    onReady()
   }
 
   useEffect(() => {
