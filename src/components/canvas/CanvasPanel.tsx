@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
-import { Background, Controls, ReactFlow, ReactFlowProvider } from '@xyflow/react'
-import type { Edge, Node, ReactFlowInstance } from '@xyflow/react'
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Background, Controls, ReactFlow, ReactFlowProvider, useEdgesState, useNodesState } from '@xyflow/react'
+import type { Edge, Node, NodeChange, ReactFlowInstance } from '@xyflow/react'
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, PanelLeftClose, PanelLeftOpen, RotateCcw } from 'lucide-react'
 import { transformAalToGraph } from '../../core/parser/graphTransformer'
 import type { AalDocument } from '../../core/types/aal.schema'
 import { useStudioStore } from '../../store/useStudioStore'
@@ -25,8 +25,202 @@ type Props = {
   onToggleEditor: () => void
 }
 
+type StoredNodeLayout = {
+  x: number
+  y: number
+  width?: number
+  height?: number
+}
+
+type StoredLayout = Record<string, StoredNodeLayout>
+
+function getPositionsStorageKey(docName: string, direction: string): string {
+  return `graphen-positions:${docName}:${direction}`
+}
+
+function loadStoredLayout(key: string): StoredLayout {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveStoredLayout(key: string, layout: StoredLayout) {
+  try {
+    if (Object.keys(layout).length === 0) {
+      localStorage.removeItem(key)
+    } else {
+      localStorage.setItem(key, JSON.stringify(layout))
+    }
+  } catch {
+    // Ignore localStorage errors (quota or private mode)
+  }
+}
+
+type CanvasContentProps = {
+  document: AalDocument
+  direction: (typeof directions)[number]['value']
+  storageKey: string
+  theme: 'dark' | 'light'
+  selectedId: string | null
+  setSelectedId: (id: string | null) => void
+  onInit: (instance: ReactFlowInstance) => void
+  onPositionsChange: (hasCustom: boolean) => void
+  onSelectedNodeChange: (node: Node | null) => void
+}
+
+function FlowCanvas({
+  document,
+  direction,
+  storageKey,
+  selectedId,
+  setSelectedId,
+  onInit,
+  onPositionsChange,
+  onSelectedNodeChange,
+}: CanvasContentProps) {
+  const flowInstanceRef = useRef<ReactFlowInstance | null>(null)
+  const graph = useMemo(() => transformAalToGraph(document, direction), [document, direction])
+
+  const initialNodes = useMemo(() => {
+    const stored = loadStoredLayout(storageKey)
+    return graph.nodes.map((node) => {
+      const saved = stored[node.id]
+      const width = saved?.width ?? (node.width != null ? Number(node.width) : node.style?.width ? Number(node.style.width) : undefined)
+      const height = saved?.height ?? (node.height != null ? Number(node.height) : node.style?.height ? Number(node.style.height) : undefined)
+
+      return {
+        ...node,
+        position: saved ? { x: saved.x, y: saved.y } : node.position,
+        ...(width != null ? { width } : {}),
+        ...(height != null ? { height } : {}),
+        style: {
+          ...node.style,
+          ...(width != null ? { width } : {}),
+          ...(height != null ? { height } : {}),
+        },
+        selected: node.id === selectedId,
+      }
+    })
+  }, [graph.nodes, storageKey, selectedId])
+
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes)
+  const [edges, , onEdgesChange] = useEdgesState<Edge>(graph.edges)
+
+  // Attach onResizeEnd callback to group nodes data to guarantee persistence
+  const nodesWithCallbacks = useMemo(() => {
+    return nodes.map((node) => {
+      if (node.type !== 'group') return node
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          onResizeEnd: (params: { width: number; height: number; x: number; y: number }) => {
+            const width = Math.round(params.width)
+            const height = Math.round(params.height)
+            const x = Math.round(params.x)
+            const y = Math.round(params.y)
+
+            setNodes((current) =>
+              current.map((n) =>
+                n.id === node.id
+                  ? {
+                      ...n,
+                      position: { x, y },
+                      width,
+                      height,
+                      style: { ...n.style, width, height },
+                    }
+                  : n,
+              ),
+            )
+
+            const currentStored = loadStoredLayout(storageKey)
+            currentStored[node.id] = {
+              x,
+              y,
+              width,
+              height,
+            }
+            saveStoredLayout(storageKey, currentStored)
+            onPositionsChange(true)
+          },
+        },
+      }
+    })
+  }, [nodes, storageKey, setNodes, onPositionsChange])
+
+  // Handle position and dimension changes and save without causing full rerenders
+  const handleNodesChange = (changes: NodeChange<Node>[]) => {
+    onNodesChange(changes)
+
+    const hasLayoutChanges = changes.some(
+      (c) => (c.type === 'position' && c.position) || c.type === 'dimensions',
+    )
+    if (hasLayoutChanges && flowInstanceRef.current) {
+      const latestNodes = flowInstanceRef.current.getNodes()
+      const layoutToSave: StoredLayout = {}
+      for (const n of latestNodes) {
+        const width = n.width != null ? Number(n.width) : n.style?.width != null ? Number(n.style.width) : undefined
+        const height = n.height != null ? Number(n.height) : n.style?.height != null ? Number(n.style.height) : undefined
+        layoutToSave[n.id] = {
+          x: n.position.x,
+          y: n.position.y,
+          ...(width != null ? { width } : {}),
+          ...(height != null ? { height } : {}),
+        }
+      }
+      saveStoredLayout(storageKey, layoutToSave)
+      onPositionsChange(true)
+    }
+  }
+
+  const handleNodeClick = (_: React.MouseEvent, node: Node) => {
+    setSelectedId(node.id)
+  }
+
+  const handleNodeDoubleClick = (_: React.MouseEvent, node: Node) => {
+    setSelectedId(node.id)
+    onSelectedNodeChange(node)
+  }
+
+  const handlePaneClick = () => {
+    setSelectedId(null)
+    onSelectedNodeChange(null)
+  }
+
+  return (
+    <ReactFlow<Node, Edge>
+      nodes={nodesWithCallbacks}
+      edges={edges}
+      onNodesChange={handleNodesChange}
+      onEdgesChange={onEdgesChange}
+      onInit={(instance) => {
+        flowInstanceRef.current = instance
+        onInit(instance)
+        instance.fitView({ padding: 0.18, maxZoom: 1 })
+      }}
+      onNodeClick={handleNodeClick}
+      onNodeDoubleClick={handleNodeDoubleClick}
+      onPaneClick={handlePaneClick}
+      nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
+      nodesDraggable={true}
+      minZoom={0.15}
+      maxZoom={2}
+      proOptions={{ hideAttribution: true }}
+    >
+      <Background color="var(--canvas-grid)" gap={24} size={1} />
+      <Controls showInteractive={false} />
+    </ReactFlow>
+  )
+}
+
 export function CanvasPanel({ document, status, editorVisible, onToggleEditor }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null)
   const [exportError, setExportError] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -34,17 +228,33 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
   const direction = useStudioStore((state) => state.layoutDirection)
   const setDirection = useStudioStore((state) => state.setLayoutDirection)
   const theme = useStudioStore((state) => state.theme)
+  const storageKey = getPositionsStorageKey(document.metadata.name, direction)
+
+  const [hasCustomPositions, setHasCustomPositions] = useState(() => {
+    return Object.keys(loadStoredLayout(storageKey)).length > 0
+  })
+
+  // Track storageKey change to sync hasCustomPositions
+  const [trackedKey, setTrackedKey] = useState(storageKey)
+  if (trackedKey !== storageKey) {
+    setTrackedKey(storageKey)
+    setHasCustomPositions(Object.keys(loadStoredLayout(storageKey)).length > 0)
+    setSelectedNode(null)
+    setSelectedId(null)
+  }
+
+  const [resetCount, setResetCount] = useState(0)
+
+  const handleResetLayout = () => {
+    saveStoredLayout(storageKey, {})
+    setHasCustomPositions(false)
+    setResetCount((c) => c + 1)
+    window.requestAnimationFrame(() => {
+      flowRef.current?.fitView({ padding: 0.18, duration: 400 })
+    })
+  }
+
   const graph = useMemo(() => transformAalToGraph(document, direction), [document, direction])
-  const selectedNode = graph.nodes.find((node) => node.id === selectedId)
-  const nodes = useMemo(
-    () => graph.nodes.map((node) => ({ ...node, selected: node.id === selectedId })),
-    [graph, selectedId],
-  )
-  const graphKey = JSON.stringify([
-    direction,
-    graph.nodes.map((node) => [node.id, node.parentId, node.position, node.style?.width, node.style?.height]),
-    graph.edges.map((edge) => [edge.source, edge.target]),
-  ])
 
   async function handleExport(format: ExportFormat) {
     if (!flowRef.current || !containerRef.current || exporting) return
@@ -91,6 +301,16 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            className="panel-toggle"
+            disabled={!hasCustomPositions}
+            onClick={handleResetLayout}
+            title={hasCustomPositions ? 'Reset to automatic layout' : 'Layout is auto-aligned'}
+            aria-label="Reset layout"
+          >
+            <RotateCcw size={15} />
+          </button>
           <div className="export-actions" role="group" aria-label="Export architecture">
             <button type="button" disabled={exporting || !graph.nodes.length} onClick={() => void handleExport('png')} title="Export PNG at 2× resolution">PNG</button>
             <button type="button" disabled={exporting || !graph.nodes.length} onClick={() => void handleExport('svg')} title="Export SVG">SVG</button>
@@ -98,31 +318,31 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
         </div>
       </div>
       <div className="canvas-body" ref={containerRef}>
-        <ReactFlowProvider key={graphKey}>
-          <ReactFlow<Node, Edge>
-            nodes={nodes}
-            edges={graph.edges}
+        <ReactFlowProvider>
+          <FlowCanvas
+            key={`${storageKey}-${resetCount}`}
+            document={document}
+            direction={direction}
+            storageKey={storageKey}
+            theme={theme}
+            selectedId={selectedId}
+            setSelectedId={setSelectedId}
             onInit={(instance) => { flowRef.current = instance }}
-            onNodeClick={(_, node) => setSelectedId(node.id)}
-            onPaneClick={() => setSelectedId(null)}
-            nodeTypes={nodeTypes}
-            edgeTypes={edgeTypes}
-            fitView
-            fitViewOptions={{ padding: 0.18, maxZoom: 1 }}
-            nodesDraggable={false}
-            minZoom={0.15}
-            maxZoom={2}
-            proOptions={{ hideAttribution: true }}
-          >
-            <Background color="var(--canvas-grid)" gap={24} size={1} />
-            <Controls showInteractive={false} />
-          </ReactFlow>
+            onPositionsChange={setHasCustomPositions}
+            onSelectedNodeChange={setSelectedNode}
+          />
         </ReactFlowProvider>
         {!graph.nodes.length && <div className="canvas-empty">Add components in the editor to see your architecture.</div>}
-        <div className="canvas-navigation-hint">Drag to pan <span aria-hidden="true">·</span> Scroll to zoom</div>
+        <div className="canvas-navigation-hint">Drag to arrange <span aria-hidden="true">·</span> Double-click for details <span aria-hidden="true">·</span> Scroll to zoom</div>
         {exportError && <div className="canvas-export-error" role="alert">{exportError}</div>}
         {selectedNode && (
-          <NodeDetails node={selectedNode} onClose={() => setSelectedId(null)} />
+          <NodeDetails
+            node={selectedNode}
+            onClose={() => {
+              setSelectedId(null)
+              setSelectedNode(null)
+            }}
+          />
         )}
       </div>
     </section>

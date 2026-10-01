@@ -8,9 +8,11 @@ type StudioState = {
   theme: Theme
   layoutDirection: LayoutDirection
   source: string
+  editorVisible: boolean
   toggleTheme: () => void
   setLayoutDirection: (direction: LayoutDirection) => void
   setSource: (source: string) => void
+  toggleEditor: () => void
 }
 
 const storedTheme = localStorage.getItem('graphen-theme')
@@ -19,11 +21,14 @@ document.documentElement.dataset.theme = initialTheme
 const storedDirection = localStorage.getItem('graphen-layout-direction')
 const initialDirection: LayoutDirection = storedDirection === 'RL' || storedDirection === 'TB' || storedDirection === 'BT'
   ? storedDirection : 'LR'
+const storedEditorVisible = localStorage.getItem('graphen-editor-visible')
+const initialEditorVisible = storedEditorVisible !== 'false'
 
 export const useStudioStore = create<StudioState>((set) => ({
   theme: initialTheme,
   layoutDirection: initialDirection,
   source: localStorage.getItem('graphen-source') ?? sampleSource,
+  editorVisible: initialEditorVisible,
   setSource: (source) => {
     localStorage.setItem('graphen-source', source)
     set({ source })
@@ -32,6 +37,12 @@ export const useStudioStore = create<StudioState>((set) => ({
     localStorage.setItem('graphen-layout-direction', direction)
     set({ layoutDirection: direction })
   },
+  toggleEditor: () =>
+    set((state) => {
+      const editorVisible = !state.editorVisible
+      localStorage.setItem('graphen-editor-visible', String(editorVisible))
+      return { editorVisible }
+    }),
   toggleTheme: () =>
     set((state) => {
       const theme = state.theme === 'dark' ? 'light' : 'dark'
