@@ -62,10 +62,11 @@ export default function Landing() {
           <img src={`${base}logo-text-dark.png`} alt="Graphen" />
         </a>
         <nav className="landing-nav" aria-label="Main navigation">
+          <a className="nav-github" href={`${base}docs/`}>Docs</a>
           <a className="nav-github" href="https://github.com/pavanad/graphen" target="_blank" rel="noopener noreferrer">
             GitHub <ArrowUpRight size={15} aria-hidden="true" />
           </a>
-          <a className="nav-studio" href={`${base}studio/`}>Open Studio <ArrowRight size={16} aria-hidden="true" /></a>
+          <a className="site-studio-link" href={`${base}studio/`}>Open Studio <ArrowRight size={16} aria-hidden="true" /></a>
         </nav>
       </header>
 
@@ -77,7 +78,7 @@ export default function Landing() {
             <p>Graphen brings multi-agent architectures into focus. Describe your system with Agent Architecture Language and explore the structure behind every connection.</p>
             <div className="hero-actions">
               <a className="primary-link" href={`${base}studio/`}>Explore the Studio <ArrowRight size={18} aria-hidden="true" /></a>
-              <a className="secondary-link" href="https://github.com/pavanad/graphen" target="_blank" rel="noopener noreferrer">View on GitHub <ArrowUpRight size={17} aria-hidden="true" /></a>
+              <a className="secondary-link" href={`${base}docs/`}>Read the docs <ArrowRight size={17} aria-hidden="true" /></a>
             </div>
             <p className="availability"><span /> The Studio is live. Write AAL and explore your architecture.</p>
           </div>

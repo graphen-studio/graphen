@@ -15,6 +15,9 @@ export function TopBar() {
       </a>
 
       <div className="top-bar-actions">
+        <a className="icon-button" href={`${import.meta.env.BASE_URL}docs/`} aria-label="AAL documentation" title="Documentation">
+          <span style={{ fontSize: 13, fontWeight: 650 }}>Docs</span>
+        </a>
         <a
           className="icon-button"
           href="https://github.com/pavanad/graphen"

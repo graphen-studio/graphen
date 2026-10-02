@@ -31,6 +31,7 @@ Instead of maintaining static diagrams that drift from implementation, Graphen l
 
 - **Landing Page**: [pavanad.github.io/graphen/](https://pavanad.github.io/graphen/)
 - **Graphen Studio**: [pavanad.github.io/graphen/studio/](https://pavanad.github.io/graphen/studio/)
+- **Documentation**: [pavanad.github.io/graphen/docs/](https://pavanad.github.io/graphen/docs/)
 
 ## Features
 
@@ -38,7 +39,7 @@ Instead of maintaining static diagrams that drift from implementation, Graphen l
 - **Fail-Safe Editing**: Syntax or reference errors display non-blocking diagnostics in the editor while preserving the last valid architecture on the canvas across sessions.
 - **Automatic Hierarchical Layout**: Powered by Dagre, groups and interconnected agent nodes automatically organize with customizable layout orientations (top-to-bottom, left-to-right).
 - **First-Class Agentic Primitives**: Built-in support for agents, foundation models, Model Context Protocol (MCP) tool endpoints, memory stores, and guardrails.
-- **Component Inspector**: Click any node on the canvas to inspect its raw metadata, configuration properties, and relationship topology.
+- **Component Inspector**: Double-click a node on the canvas to inspect its metadata and configuration properties.
 - **High-Resolution Export**: Export canvas representations directly to 2x resolution PNG or scalable vector graphics (SVG) for architecture reviews and documentation.
 - **Local Persistence**: Code and canvas states persist automatically in browser local storage.
 
@@ -93,13 +94,38 @@ memories:
   - id: knowledge_base
     group: technical_support
     name: "Knowledge Base"
-    kind: "vector"
+    provider: "Qdrant"
+    mode: "RAG"
+
+tools:
+  - id: classifier
+    name: "Intent Classifier"
+    mechanism: "function"
 
 guardrails:
   - id: pii_filter
     name: "PII Masking"
-    type: "input_guardrail"
+    mechanism: "pattern-matching"
+
+topology:
+  - from: supervisor
+    to: specialist
+    label: "Delegates"
+  - from: supervisor
+    to: classifier
+    label: "Classifies intent"
+  - from: specialist
+    to: customer_db
+    label: "Queries customer data"
 ```
+
+Agent references such as `tools: [classifier]` describe dependencies; `topology` defines the connections shown on the canvas. For every field and validation rule, see the [AAL documentation](https://pavanad.github.io/graphen/docs/).
+
+## Create architectures with a coding agent
+
+The repository includes an [AAL architecture skill](skills/aal-architecture/SKILL.md) that teaches coding agents how to create `.aal.yaml` files: select components, define model and tool references, add the desired `topology`, and check IDs against the language rules. It includes a complete starting example and points to the [AAL schema](src/core/types/aal.schema.ts) as the source of truth.
+
+Give your agent the `SKILL.md` file or add the `skills/aal-architecture/` folder to the skills location supported by your agent tool. Skill installation and automatic discovery vary by tool. Describe the architecture you want, then paste the generated YAML into [Graphen Studio](https://pavanad.github.io/graphen/studio/) to inspect it visually.
 
 ## Getting Started
 
@@ -126,9 +152,10 @@ Start the Vite development server:
 npm run dev
 ```
 
-The application provides two entry points:
+The application provides three entry points:
 - **Landing Page**: `http://localhost:5173/graphen/`
 - **Studio Editor**: `http://localhost:5173/graphen/studio/`
+- **Documentation**: `http://localhost:5173/graphen/docs/`
 
 ### Available Scripts
 
@@ -145,7 +172,7 @@ The application provides two entry points:
 - **Parser (`src/core/parser/aalParser.ts`)**: Parses YAML input using `js-yaml` and enforces strict structural and cross-reference validation via Zod schemas (`src/core/types/aal.schema.ts`). Emits structured `AalParseError` exceptions with exact line pointers.
 - **Graph Transformer (`src/core/parser/graphTransformer.ts`)**: Converts validated AAL documents into React Flow nodes and edges, grouping nested structures and computing positions with `@dagrejs/dagre`.
 - **State Management (`src/store/useStudioStore.ts`)**: Manages document synchronization, active layouts, selection states, and `localStorage` persistence.
-- **Dual Entry Vite Configuration (`vite.config.ts`)**: Handles multi-page routing for both `/graphen/` (landing) and `/graphen/studio/` under GitHub Pages deployment paths.
+- **Vite Configuration (`vite.config.ts`)**: Builds the landing, Studio, and documentation pages under the `/graphen/` GitHub Pages base path.
 
 ## Deployment
 
