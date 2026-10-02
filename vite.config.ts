@@ -11,6 +11,7 @@ export default defineConfig({
       input: {
         landing: fileURLToPath(new URL('./index.html', import.meta.url)),
         studio: fileURLToPath(new URL('./studio/index.html', import.meta.url)),
+        docs: fileURLToPath(new URL('./docs/index.html', import.meta.url)),
       },
     },
   },
