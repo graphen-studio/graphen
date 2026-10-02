@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import sampleSource from '../assets/sample.aal.yaml?raw'
+import { readShareLink } from '../core/shareLink'
 import type { LayoutDirection } from '../core/types/graph'
 
 type Theme = 'dark' | 'light'
@@ -8,6 +9,8 @@ type StudioState = {
   theme: Theme
   layoutDirection: LayoutDirection
   source: string
+  sharedLayoutScope: string | null
+  shareError: string | null
   editorVisible: boolean
   toggleTheme: () => void
   setLayoutDirection: (direction: LayoutDirection) => void
@@ -23,11 +26,18 @@ const initialDirection: LayoutDirection = storedDirection === 'RL' || storedDire
   ? storedDirection : 'LR'
 const storedEditorVisible = localStorage.getItem('graphen-editor-visible')
 const initialEditorVisible = storedEditorVisible !== 'false'
+const shared = readShareLink(window.location.hash)
+if (shared.source) {
+  localStorage.setItem('graphen-source', shared.source)
+  window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`)
+}
 
 export const useStudioStore = create<StudioState>((set) => ({
   theme: initialTheme,
   layoutDirection: initialDirection,
-  source: localStorage.getItem('graphen-source') ?? sampleSource,
+  source: shared.source ?? localStorage.getItem('graphen-source') ?? sampleSource,
+  sharedLayoutScope: shared.source ? crypto.randomUUID() : null,
+  shareError: shared.error ?? null,
   editorVisible: initialEditorVisible,
   setSource: (source) => {
     localStorage.setItem('graphen-source', source)

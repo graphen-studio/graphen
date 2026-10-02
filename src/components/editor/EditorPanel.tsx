@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import Editor, { loader, type BeforeMount, type OnMount } from '@monaco-editor/react'
-import { Check, ChevronDown, ChevronUp, Copy, Download, FileCode2 } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Copy, Download, FileCode2, Share2 } from 'lucide-react'
 import * as monaco from 'monaco-editor/editor/editor.api'
 import type { editor } from 'monaco-editor'
 import EditorWorker from 'monaco-editor/editor/editor.worker.js?worker'
 import type { AalParseError } from '../../core/parser/aalParser'
+import { createShareLink } from '../../core/shareLink'
 import { useStudioStore } from '../../store/useStudioStore'
 
 import sampleSource from '../../assets/sample.aal.yaml?raw'
@@ -73,7 +74,7 @@ const configureEditor: BeforeMount = (api) => {
   })
 }
 
-type Props = { error: AalParseError | null; onReady: () => void }
+type Props = { error: AalParseError | null; shareDisabled: boolean; onReady: () => void }
 
 function applyDiagnostics(
   instance: editor.IStandaloneCodeEditor,
@@ -109,13 +110,14 @@ const examples = [
   { id: 'security', label: 'Security Gates', description: 'Approval gates and guardrails', source: securitySource },
 ] as const
 
-export default function EditorPanel({ error, onReady }: Props) {
+export default function EditorPanel({ error, shareDisabled, onReady }: Props) {
   const source = useStudioStore((state) => state.source)
   const setSource = useStudioStore((state) => state.setSource)
   const theme = useStudioStore((state) => state.theme)
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const decorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)
   const copyTimeout = useRef<number | undefined>(undefined)
@@ -143,6 +145,7 @@ export default function EditorPanel({ error, onReady }: Props) {
   function loadExample(exampleSource: string) {
     setSource(exampleSource)
     setCopyState('idle')
+    setShareFeedback(null)
     setMenuOpen(false)
   }
 
@@ -155,6 +158,19 @@ export default function EditorPanel({ error, onReady }: Props) {
       setCopyState('error')
     }
     copyTimeout.current = window.setTimeout(() => setCopyState('idle'), 2000)
+  }
+
+  async function shareYaml() {
+    window.clearTimeout(copyTimeout.current)
+    try {
+      const link = createShareLink(source, window.location.href)
+      await navigator.clipboard.writeText(link)
+      setShareFeedback('Link copied')
+    } catch (error) {
+      setShareFeedback(error instanceof Error && error.message.includes('too large')
+        ? 'Link too long — download YAML.' : 'Could not copy the share link.')
+    }
+    copyTimeout.current = window.setTimeout(() => setShareFeedback(null), 5000)
   }
 
   function downloadYaml() {
@@ -191,8 +207,18 @@ export default function EditorPanel({ error, onReady }: Props) {
         <span>architecture.aal.yaml</span>
         <span className={`editor-status${error ? ' is-error' : ''}`}>{error ? 'Invalid AAL' : 'Saved locally'}</span>
         <span className="copy-feedback" aria-live="polite">
-          {copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : ''}
+          {shareFeedback ?? (copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : '')}
         </span>
+        <button
+          className="editor-copy-button"
+          type="button"
+          disabled={shareDisabled}
+          onClick={() => void shareYaml()}
+          aria-label="Copy architecture share link"
+          title={shareDisabled ? 'Fix YAML errors before sharing' : 'Copy share link'}
+        >
+          <Share2 size={15} />
+        </button>
         <button
           className="editor-copy-button"
           type="button"
@@ -252,6 +278,7 @@ export default function EditorPanel({ error, onReady }: Props) {
           value={source}
           onChange={(value) => {
             setCopyState('idle')
+            setShareFeedback(null)
             setSource(value ?? '')
           }}
           beforeMount={configureEditor}

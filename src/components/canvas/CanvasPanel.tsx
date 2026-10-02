@@ -257,7 +257,10 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
   const direction = useStudioStore((state) => state.layoutDirection)
   const setDirection = useStudioStore((state) => state.setLayoutDirection)
   const theme = useStudioStore((state) => state.theme)
-  const storageKey = getPositionsStorageKey(document.metadata.name, direction)
+  const sharedLayoutScope = useStudioStore((state) => state.sharedLayoutScope)
+  const storageKey = sharedLayoutScope
+    ? `graphen-shared-positions:${sharedLayoutScope}:${document.metadata.name}:${direction}`
+    : getPositionsStorageKey(document.metadata.name, direction)
 
   const [hasCustomPositions, setHasCustomPositions] = useState(() => {
     return Object.keys(loadStoredLayout(storageKey)).length > 0
