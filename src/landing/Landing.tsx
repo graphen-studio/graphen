@@ -66,7 +66,7 @@ export default function Landing() {
           <a className="nav-github" href="https://github.com/pavanad/graphen" target="_blank" rel="noopener noreferrer">
             GitHub <ArrowUpRight size={15} aria-hidden="true" />
           </a>
-          <a className="nav-studio" href={`${base}studio/`}>Open Studio <ArrowRight size={16} aria-hidden="true" /></a>
+          <a className="site-studio-link" href={`${base}studio/`}>Open Studio <ArrowRight size={16} aria-hidden="true" /></a>
         </nav>
       </header>
 

@@ -28,18 +28,6 @@
 .docs-brand span { padding-left: 16px; border-left: 1px solid #ffffff2b; color: #a9b3c5; }
 .docs-header nav { display: flex; align-items: center; gap: 28px; font-size: 13px; font-weight: 600; }
 .docs-header nav a { color: #b4bccd; }
-.docs-header nav .docs-studio-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 11px 16px;
-  color: #fff;
-  background: #1c202d;
-  border: 1px solid #363d50;
-  border-radius: 8px;
-  transition: background .2s ease;
-}
-.docs-header nav .docs-studio-link:hover { background: #292f42; }
 
 .docs-layout {
   position: relative;
@@ -176,7 +164,6 @@
   .docs-brand img { width: 126px; }
   .docs-header nav { gap: 12px; }
   .docs-header nav > a:first-child { display: none; }
-  .docs-header nav .docs-studio-link { padding: 10px 12px; font-size: 12px; }
   .docs-content h1 { font-size: clamp(42px, 9vw, 56px); }
   .docs-lead { font-size: 15px; }
   .docs-intro-actions { margin-bottom: 76px; }

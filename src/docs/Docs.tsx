@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, ArrowUpRight, BookOpen, ExternalLink } from 'lucide-react'
+import { ArrowRight, BookOpen, ExternalLink } from 'lucide-react'
 import hljs from 'highlight.js/lib/core'
 import yaml from 'highlight.js/lib/languages/yaml'
 import simpleExample from '../assets/simple-agent.aal.yaml?raw'
@@ -164,7 +164,7 @@ export default function Docs() {
       <a className="docs-skip" href="#main-content">Skip to content</a>
       <header className="docs-header">
         <a href={base} className="docs-brand" aria-label="Graphen home"><img src={`${base}logo-text-dark.png`} alt="Graphen" /><span>Docs</span></a>
-        <nav aria-label="Site navigation"><a href={base}>Home</a><a className="docs-studio-link" href={`${base}studio/`}>Open Studio <ArrowUpRight size={16} aria-hidden="true" /></a></nav>
+        <nav aria-label="Site navigation"><a href={base}>Home</a><a className="site-studio-link" href={`${base}studio/`}>Open Studio <ArrowRight size={16} aria-hidden="true" /></a></nav>
       </header>
       <div className="docs-layout">
         <aside className="docs-sidebar" aria-label="Documentation navigation">

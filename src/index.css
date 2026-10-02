@@ -59,3 +59,34 @@ body {
 button {
   font: inherit;
 }
+
+.landing .site-studio-link,
+.docs-site .site-studio-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 11px 16px;
+  color: #fff;
+  background: #1c202d;
+  border: 1px solid #363d50;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+  transition: background .2s ease;
+}
+
+.landing .site-studio-link:hover,
+.docs-site .site-studio-link:hover {
+  color: #fff;
+  background: #292f42;
+}
+
+@media (max-width: 680px) {
+  .landing .site-studio-link,
+  .docs-site .site-studio-link {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+}
