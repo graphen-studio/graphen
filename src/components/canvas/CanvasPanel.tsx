@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Background, Controls, ReactFlow, ReactFlowProvider, useEdgesState, useNodesState } from '@xyflow/react'
 import type { Edge, Node, NodeChange, ReactFlowInstance } from '@xyflow/react'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, PanelLeftClose, PanelLeftOpen, RotateCcw } from 'lucide-react'
@@ -64,7 +64,6 @@ type CanvasContentProps = {
   direction: (typeof directions)[number]['value']
   storageKey: string
   theme: 'dark' | 'light'
-  selectedId: string | null
   setSelectedId: (id: string | null) => void
   onInit: (instance: ReactFlowInstance) => void
   onPositionsChange: (hasCustom: boolean) => void
@@ -75,7 +74,6 @@ function FlowCanvas({
   document,
   direction,
   storageKey,
-  selectedId,
   setSelectedId,
   onInit,
   onPositionsChange,
@@ -101,13 +99,43 @@ function FlowCanvas({
           ...(width != null ? { width } : {}),
           ...(height != null ? { height } : {}),
         },
-        selected: node.id === selectedId,
       }
     })
-  }, [graph.nodes, storageKey, selectedId])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Only used at mount; ongoing sync handled by the useEffect below
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes)
-  const [edges, , onEdgesChange] = useEdgesState<Edge>(graph.edges)
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(graph.edges)
+
+  // Keep nodes and edges synchronized when document/graph or direction updates
+  useEffect(() => {
+    const stored = loadStoredLayout(storageKey)
+    setNodes((current) => {
+      // Build a map of current positions so we don't lose drag state for
+      // nodes that still exist in the new graph.
+      const currentMap = new Map(current.map((n) => [n.id, n]))
+      return graph.nodes.map((node) => {
+        const saved = stored[node.id]
+        const existing = currentMap.get(node.id)
+        const width = saved?.width ?? (node.width != null ? Number(node.width) : node.style?.width ? Number(node.style.width) : undefined)
+        const height = saved?.height ?? (node.height != null ? Number(node.height) : node.style?.height ? Number(node.style.height) : undefined)
+
+        return {
+          ...node,
+          // Prefer saved position, then current dragged position, then graph default
+          position: saved ? { x: saved.x, y: saved.y } : (existing?.position ?? node.position),
+          ...(width != null ? { width } : {}),
+          ...(height != null ? { height } : {}),
+          style: {
+            ...node.style,
+            ...(width != null ? { width } : {}),
+            ...(height != null ? { height } : {}),
+          },
+        }
+      })
+    })
+    setEdges(graph.edges)
+  }, [graph, storageKey, setNodes, setEdges])
 
   // Attach onResizeEnd callback to group nodes data to guarantee persistence
   const nodesWithCallbacks = useMemo(() => {
@@ -200,7 +228,6 @@ function FlowCanvas({
       onInit={(instance) => {
         flowInstanceRef.current = instance
         onInit(instance)
-        instance.fitView({ padding: 0.18, maxZoom: 1 })
       }}
       onNodeClick={handleNodeClick}
       onNodeDoubleClick={handleNodeDoubleClick}
@@ -208,6 +235,9 @@ function FlowCanvas({
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       nodesDraggable={true}
+      panActivationKeyCode={null}
+      fitView
+      fitViewOptions={{ padding: 0.18, maxZoom: 1 }}
       minZoom={0.15}
       maxZoom={2}
       proOptions={{ hideAttribution: true }}
@@ -219,7 +249,6 @@ function FlowCanvas({
 }
 
 export function CanvasPanel({ document, status, editorVisible, onToggleEditor }: Props) {
-  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selectedNode, setSelectedNode] = useState<Node | null>(null)
   const [exportError, setExportError] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
@@ -240,7 +269,6 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
     setTrackedKey(storageKey)
     setHasCustomPositions(Object.keys(loadStoredLayout(storageKey)).length > 0)
     setSelectedNode(null)
-    setSelectedId(null)
   }
 
   const [resetCount, setResetCount] = useState(0)
@@ -325,8 +353,7 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
             direction={direction}
             storageKey={storageKey}
             theme={theme}
-            selectedId={selectedId}
-            setSelectedId={setSelectedId}
+            setSelectedId={(id) => { if (id === null) setSelectedNode(null) }}
             onInit={(instance) => { flowRef.current = instance }}
             onPositionsChange={setHasCustomPositions}
             onSelectedNodeChange={setSelectedNode}
@@ -339,7 +366,6 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
           <NodeDetails
             node={selectedNode}
             onClose={() => {
-              setSelectedId(null)
               setSelectedNode(null)
             }}
           />
