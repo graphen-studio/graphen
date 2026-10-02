@@ -33,10 +33,19 @@
   --border: #dde3ee;
   --text: #171d2b;
   --muted: #626e82;
-  --accent: #2563eb;
+  /* Softer blue accent — less saturated, darker value to feel at home on white */
+  --accent: #3b6fd4;
   --accent-soft: #e8f0ff;
   --canvas-grid: #cdd6e5;
   --error-text: #b91c1c;
+
+  /* Node-type colors: desaturated ~20% and darkened to avoid neon-on-white effect */
+  --color-graphen-agent:     #4a7fd6;   /* blue:    hsl(213 62% 56%)  → was #3b82f6 */
+  --color-graphen-mcp:       #0e9ab5;   /* cyan:    hsl(191 84% 38%)  → was #06b6d4 */
+  --color-graphen-memory:    #0f9e72;   /* emerald: hsl(161 80% 34%)  → was #10b981 */
+  --color-graphen-tool:      #7048c8;   /* purple:  hsl(261 53% 53%)  → was #8b5cf6 */
+  --color-graphen-guardrail: #c77c0a;   /* amber:   hsl(35 89% 40%)   → was #f59e0b */
+  --color-graphen-logic:     #c4581a;   /* orange:  hsl(24 76% 43%)   → was #f97316 */
 }
 
 body {
