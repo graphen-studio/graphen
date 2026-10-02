@@ -19,6 +19,7 @@ type Draft = {
 export default function App() {
   const source = useStudioStore((state) => state.source)
   const editorVisible = useStudioStore((state) => state.editorVisible)
+  const shareError = useStudioStore((state) => state.shareError)
   const toggleEditor = useStudioStore((state) => state.toggleEditor)
   const [editorReady, setEditorReady] = useState(false)
   const [draft, setDraft] = useState<Draft>(() => {
@@ -63,9 +64,10 @@ export default function App() {
   return (
     <div className="app-shell">
       <TopBar />
+      {shareError && <div className="share-error" role="alert">{shareError}</div>}
       <main className={`workspace${editorVisible ? '' : ' editor-hidden'}`}>
         <Suspense fallback={<section className="editor-panel" id="graphen-editor" aria-label="Code editor"><div className="panel-heading">Editor</div><span className="editor-loading">Loading editor…</span></section>}>
-          <EditorPanel error={pending ? null : draft.error} onReady={() => setEditorReady(true)} />
+          <EditorPanel error={pending ? null : draft.error} shareDisabled={pending || !!draft.error} onReady={() => setEditorReady(true)} />
         </Suspense>
         {editorReady ? (
           <CanvasPanel

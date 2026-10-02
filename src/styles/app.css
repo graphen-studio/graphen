@@ -166,6 +166,18 @@ button:focus-visible {
   color: var(--accent);
 }
 
+.editor-copy-button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
+.share-error {
+  padding: 8px 16px;
+  color: var(--error-text);
+  background: var(--surface);
+  font-size: 12px;
+}
+
 .example-picker {
   position: relative;
   flex: none;
@@ -304,6 +316,10 @@ button:focus-visible {
 
 .copy-feedback {
   flex: none;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--accent);
   font-size: 11px;
   font-weight: 400;
