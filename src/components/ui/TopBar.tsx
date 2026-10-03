@@ -20,7 +20,7 @@ export function TopBar() {
         </a>
         <a
           className="icon-button"
-          href="https://github.com/pavanad/graphen"
+          href="https://github.com/graphen-studio/graphen"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Graphen on GitHub (opens in a new tab)"

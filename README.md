@@ -11,12 +11,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pavanad/graphen/actions/workflows/deploy.yml"><img alt="CI/CD Status" src="https://img.shields.io/github/actions/workflow/status/pavanad/graphen/deploy.yml?branch=main&style=flat-square&label=Deploy"></a>
-  <a href="https://github.com/pavanad/graphen/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square"></a>
+  <a href="https://github.com/graphen-studio/graphen/actions/workflows/deploy.yml"><img alt="CI/CD Status" src="https://img.shields.io/github/actions/workflow/status/graphen-studio/graphen/deploy.yml?branch=main&style=flat-square&label=Deploy"></a>
+  <a href="https://github.com/graphen-studio/graphen/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square"></a>
   <a href="https://www.typescriptlang.org/"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white"></a>
   <a href="https://react.dev/"><img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black"></a>
   <a href="https://vite.dev/"><img alt="Vite" src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white"></a>
-  <a href="https://pavanad.github.io/graphen/studio/"><img alt="Live Studio" src="https://img.shields.io/badge/demo-Live%20Studio-059669?style=flat-square"></a>
+  <a href="https://graphen-studio.github.io/graphen/studio/"><img alt="Live Studio" src="https://img.shields.io/badge/demo-Live%20Studio-059669?style=flat-square"></a>
 </p>
 
 ---
@@ -29,9 +29,9 @@ Instead of maintaining static diagrams that drift from implementation, Graphen l
 
 ## Live Demo
 
-- **Landing Page**: [pavanad.github.io/graphen/](https://pavanad.github.io/graphen/)
-- **Graphen Studio**: [pavanad.github.io/graphen/studio/](https://pavanad.github.io/graphen/studio/)
-- **Documentation**: [pavanad.github.io/graphen/docs/](https://pavanad.github.io/graphen/docs/)
+- **Landing Page**: [graphen-studio.github.io/graphen/](https://graphen-studio.github.io/graphen/)
+- **Graphen Studio**: [graphen-studio.github.io/graphen/studio/](https://graphen-studio.github.io/graphen/studio/)
+- **Documentation**: [graphen-studio.github.io/graphen/docs/](https://graphen-studio.github.io/graphen/docs/)
 
 ## Features
 
@@ -119,13 +119,13 @@ topology:
     label: "Queries customer data"
 ```
 
-Agent references such as `tools: [classifier]` describe dependencies; `topology` defines the connections shown on the canvas. For every field and validation rule, see the [AAL documentation](https://pavanad.github.io/graphen/docs/).
+Agent references such as `tools: [classifier]` describe dependencies; `topology` defines the connections shown on the canvas. For every field and validation rule, see the [AAL documentation](https://graphen-studio.github.io/graphen/docs/).
 
 ## Create architectures with a coding agent
 
 The repository includes an [AAL architecture skill](skills/aal-architecture/SKILL.md) that teaches coding agents how to create `.aal.yaml` files: select components, define model and tool references, add the desired `topology`, and check IDs against the language rules. It includes a complete starting example and points to the [AAL schema](src/core/types/aal.schema.ts) as the source of truth.
 
-Give your agent the `SKILL.md` file or add the `skills/aal-architecture/` folder to the skills location supported by your agent tool. Skill installation and automatic discovery vary by tool. Describe the architecture you want, then paste the generated YAML into [Graphen Studio](https://pavanad.github.io/graphen/studio/) to inspect it visually.
+Give your agent the `SKILL.md` file or add the `skills/aal-architecture/` folder to the skills location supported by your agent tool. Skill installation and automatic discovery vary by tool. Describe the architecture you want, then paste the generated YAML into [Graphen Studio](https://graphen-studio.github.io/graphen/studio/) to inspect it visually.
 
 ## Getting Started
 
@@ -139,7 +139,7 @@ Give your agent the `SKILL.md` file or add the `skills/aal-architecture/` folder
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/pavanad/graphen.git
+git clone https://github.com/graphen-studio/graphen.git
 cd graphen
 npm ci
 ```

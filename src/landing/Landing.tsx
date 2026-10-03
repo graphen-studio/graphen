@@ -63,7 +63,7 @@ export default function Landing() {
         </a>
         <nav className="landing-nav" aria-label="Main navigation">
           <a className="nav-github" href={`${base}docs/`}>Docs</a>
-          <a className="nav-github" href="https://github.com/pavanad/graphen" target="_blank" rel="noopener noreferrer">
+          <a className="nav-github" href="https://github.com/graphen-studio/graphen" target="_blank" rel="noopener noreferrer">
             GitHub <ArrowUpRight size={15} aria-hidden="true" />
           </a>
           <a className="site-studio-link" href={`${base}studio/`}>Open Studio <ArrowRight size={16} aria-hidden="true" /></a>
@@ -122,7 +122,7 @@ export default function Landing() {
       <footer className="landing-footer page-width">
         <a href={base} aria-label="Graphen home"><img src={`${base}logo-without-text.png`} alt="" /></a>
         <span>Graphen · Agent Architecture Language</span>
-        <a href="https://github.com/pavanad/graphen" target="_blank" rel="noopener noreferrer">Open source on GitHub <ArrowUpRight size={14} aria-hidden="true" /></a>
+        <a href="https://github.com/graphen-studio/graphen" target="_blank" rel="noopener noreferrer">Open source on GitHub <ArrowUpRight size={14} aria-hidden="true" /></a>
       </footer>
     </div>
   )
