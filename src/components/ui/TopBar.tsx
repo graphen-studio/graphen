@@ -1,4 +1,4 @@
-import { Moon, Sun } from 'lucide-react'
+import { BookOpen, Moon, Sun } from 'lucide-react'
 import { useStudioStore } from '../../store/useStudioStore'
 
 export function TopBar() {
@@ -16,7 +16,7 @@ export function TopBar() {
 
       <div className="top-bar-actions">
         <a className="icon-button" href={`${import.meta.env.BASE_URL}docs/`} aria-label="AAL documentation" title="Documentation">
-          <span style={{ fontSize: 13, fontWeight: 650 }}>Docs</span>
+          <BookOpen size={18} />
         </a>
         <a
           className="icon-button"
