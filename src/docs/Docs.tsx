@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, BookOpen, ExternalLink } from 'lucide-react'
+import { ArrowRight, BookOpen, ChevronDown, ExternalLink } from 'lucide-react'
 import hljs from 'highlight.js/lib/core'
 import yaml from 'highlight.js/lib/languages/yaml'
 import simpleExample from '../assets/simple-agent.aal.yaml?raw'
@@ -128,6 +128,8 @@ function FieldTable({ fields }: { fields: Field[] }) {
 
 export default function Docs() {
   const [activeSection, setActiveSection] = useState('getting-started')
+  const [menuOpen, setMenuOpen] = useState(false)
+  const activeLabel = navigation.flatMap((group) => group.links.map(([id, label]) => ({ id, label }))).find((link) => link.id === activeSection)?.label ?? 'Getting started'
 
   useEffect(() => {
     const sections = navigation.flatMap((group) => group.links.map(([id]) => document.getElementById(id))).filter((section): section is HTMLElement => section !== null)
@@ -168,8 +170,11 @@ export default function Docs() {
       </header>
       <div className="docs-layout">
         <aside className="docs-sidebar" aria-label="Documentation navigation">
-          <nav aria-label="On this page">{navigation.map((group) => <div className="docs-nav-group" key={group.title}>
-            <h2>{group.title}</h2>{group.links.map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? 'is-active' : undefined} aria-current={activeSection === id ? 'location' : undefined} onClick={() => setActiveSection(id)}>{label}</a>)}
+          <button className="docs-menu-toggle" type="button" aria-expanded={menuOpen} aria-controls="docs-section-nav" onClick={() => setMenuOpen((open) => !open)}>
+            <span><small>ON THIS PAGE</small>{activeLabel}</span><ChevronDown size={18} aria-hidden="true" />
+          </button>
+          <nav id="docs-section-nav" className={menuOpen ? 'is-open' : undefined} aria-label="On this page">{navigation.map((group) => <div className="docs-nav-group" key={group.title}>
+            <h2>{group.title}</h2>{group.links.map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? 'is-active' : undefined} aria-current={activeSection === id ? 'location' : undefined} onClick={() => { setActiveSection(id); setMenuOpen(false) }}>{label}</a>)}
           </div>)}</nav>
         </aside>
         <main id="main-content" className="docs-content">
