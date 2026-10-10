@@ -150,5 +150,6 @@ export const aalSchema = z.strictObject({
 })
 
 export type AalDocument = z.infer<typeof aalSchema>
+export type AalMetadata = AalDocument['metadata']
 export type AalAgent = NonNullable<AalDocument['agents']>[number]
 export type AalModel = NonNullable<AalDocument['models']>[number]

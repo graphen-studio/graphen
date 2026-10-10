@@ -6,6 +6,7 @@ import { transformAalToGraph } from '../../core/parser/graphTransformer'
 import type { AalDocument } from '../../core/types/aal.schema'
 import { useStudioStore } from '../../store/useStudioStore'
 import { NodeDetails } from './NodeDetails'
+import { MetadataInfoPopover } from './MetadataInfoPopover'
 import { ParticleEdge } from './edges/ParticleEdge'
 import { exportGraph, type ExportFormat } from './exportGraph'
 import { nodeTypes } from './nodes/nodeTypes'
@@ -303,7 +304,10 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
   return (
     <section className="canvas-panel" aria-label="Architecture canvas">
       <div className="panel-heading canvas-heading">
-        <span title={document.metadata.name}>{document.metadata.name}</span>
+        <div className="canvas-heading-title">
+          <span title={document.metadata.name}>{document.metadata.name}</span>
+          <MetadataInfoPopover metadata={document.metadata} />
+        </div>
         <div className="canvas-heading-actions">
           <span className="canvas-status">{status}</span>
           <button
