@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Background, Controls, ReactFlow, ReactFlowProvider, useEdgesState, useNodesState } from '@xyflow/react'
+import { Background, ConnectionMode, Controls, ReactFlow, ReactFlowProvider, useEdgesState, useNodesState } from '@xyflow/react'
 import type { Edge, Node, NodeChange, ReactFlowInstance } from '@xyflow/react'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, PanelLeftClose, PanelLeftOpen, RotateCcw } from 'lucide-react'
 import { transformAalToGraph } from '../../core/parser/graphTransformer'
@@ -226,6 +226,7 @@ function FlowCanvas({
       edges={edges}
       onNodesChange={handleNodesChange}
       onEdgesChange={onEdgesChange}
+      connectionMode={ConnectionMode.Loose}
       onInit={(instance) => {
         flowInstanceRef.current = instance
         onInit(instance)
@@ -282,7 +283,7 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
     setHasCustomPositions(false)
     setResetCount((c) => c + 1)
     window.requestAnimationFrame(() => {
-      flowRef.current?.fitView({ padding: 0.18, duration: 400 })
+      flowRef.current?.fitView({ padding: 0.18 })
     })
   }
 
@@ -341,7 +342,7 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
             className="panel-toggle"
             disabled={!hasCustomPositions}
             onClick={handleResetLayout}
-            title={hasCustomPositions ? 'Reset to automatic layout' : 'Layout is auto-aligned'}
+            title="Reset to automatic layout"
             aria-label="Reset layout"
           >
             <RotateCcw size={15} />

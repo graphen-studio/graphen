@@ -1,13 +1,6 @@
 import { Handle, Position } from '@xyflow/react'
 import type { LucideIcon } from 'lucide-react'
-import { useStudioStore } from '../../../store/useStudioStore'
 
-const handlePositions = {
-  LR: { target: Position.Left, source: Position.Right },
-  RL: { target: Position.Right, source: Position.Left },
-  TB: { target: Position.Top, source: Position.Bottom },
-  BT: { target: Position.Bottom, source: Position.Top },
-}
 
 type Props = {
   category: string
@@ -19,12 +12,16 @@ type Props = {
 }
 
 export function NodeCard({ category, label, name, icon: Icon, detail, badges = [] }: Props) {
-  const direction = useStudioStore((state) => state.layoutDirection)
-  const handles = handlePositions[direction]
-
   return (
     <div className={`graph-card graph-card-${category}`}>
-      <Handle type="target" position={handles.target} />
+      <Handle id="top" type="source" position={Position.Top} />
+      <Handle id="top-target" type="target" position={Position.Top} />
+      <Handle id="right" type="source" position={Position.Right} />
+      <Handle id="right-target" type="target" position={Position.Right} />
+      <Handle id="bottom" type="source" position={Position.Bottom} />
+      <Handle id="bottom-target" type="target" position={Position.Bottom} />
+      <Handle id="left" type="source" position={Position.Left} />
+      <Handle id="left-target" type="target" position={Position.Left} />
       <div className="graph-card-header">
         <span className="graph-card-icon"><Icon size={17} strokeWidth={1.8} /></span>
         <span className="graph-card-category">{label}</span>
@@ -36,7 +33,7 @@ export function NodeCard({ category, label, name, icon: Icon, detail, badges = [
           {badges.map((badge) => <span className="graph-card-badge" title={badge} key={badge}>{badge}</span>)}
         </div>
       )}
-      <Handle type="source" position={handles.source} />
     </div>
   )
 }
+
