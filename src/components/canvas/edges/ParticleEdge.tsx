@@ -1,10 +1,48 @@
-import { BaseEdge, getBezierPath, type EdgeProps } from '@xyflow/react'
+import { BaseEdge, getBezierPath, useInternalNode, type EdgeProps } from '@xyflow/react'
+import { getFloatingEdgeParams } from './floatingEdgeUtils'
 
 export function ParticleEdge({
-  id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, label, style,
+  id,
+  source,
+  target,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  label,
+  style,
 }: EdgeProps) {
+  const sourceNode = useInternalNode(source)
+  const targetNode = useInternalNode(target)
+
+  let sx = sourceX
+  let sy = sourceY
+  let tx = targetX
+  let ty = targetY
+  let sp = sourcePosition
+  let tp = targetPosition
+
+  if (sourceNode && targetNode) {
+    const params = getFloatingEdgeParams(sourceNode, targetNode)
+    if (params) {
+      sx = params.sx
+      sy = params.sy
+      tx = params.tx
+      ty = params.ty
+      sp = params.sourcePos
+      tp = params.targetPos
+    }
+  }
+
   const [path, labelX, labelY] = getBezierPath({
-    sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition,
+    sourceX: sx,
+    sourceY: sy,
+    targetX: tx,
+    targetY: ty,
+    sourcePosition: sp,
+    targetPosition: tp,
   })
 
   return (
