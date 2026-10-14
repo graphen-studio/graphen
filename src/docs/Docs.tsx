@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
-import { ArrowRight, BookOpen, ChevronDown, ExternalLink } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowRight, BookOpen, Check, ChevronDown, Copy, ExternalLink } from 'lucide-react'
 import hljs from 'highlight.js/lib/core'
 import yaml from 'highlight.js/lib/languages/yaml'
 import simpleExample from '../assets/simple-agent.aal.yaml?raw'
+import skillContent from '../../skills/aal-architecture/SKILL.md?raw'
 
 hljs.registerLanguage('yaml', yaml)
 const base = import.meta.env.BASE_URL
@@ -111,6 +112,37 @@ const references: { id: string; title: string; intro: string; fields: Field[]; e
 
 function Code({ children }: { children: string }) {
   return <pre className="docs-code"><code className="hljs language-yaml" dangerouslySetInnerHTML={{ __html: hljs.highlight(children, { language: 'yaml' }).value }} /></pre>
+}
+
+function SkillBlock() {
+  const [copied, setCopied] = useState(false)
+  const timeoutRef = useRef<number | undefined>(undefined)
+
+  function handleCopy() {
+    window.clearTimeout(timeoutRef.current)
+    navigator.clipboard.writeText(skillContent).then(() => {
+      setCopied(true)
+      timeoutRef.current = window.setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {})
+  }
+
+  return (
+    <details className="docs-skill-block">
+      <summary>
+        <span>View skill content</span>
+        <span className="docs-skill-hint">Copy and give to your coding agent</span>
+      </summary>
+      <div className="docs-skill-body">
+        <div className="docs-skill-toolbar">
+          <span className="docs-skill-filename">aal-architecture/SKILL.md</span>
+          <button type="button" className="docs-skill-copy" onClick={handleCopy} aria-label="Copy skill content">
+            {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy</>}
+          </button>
+        </div>
+        <pre className="docs-skill-content">{skillContent}</pre>
+      </div>
+    </details>
+  )
 }
 
 function FieldTable({ fields }: { fields: Field[] }) {
@@ -254,8 +286,9 @@ export default function Docs() {
           </section>
           <section id="agent-skill" className="docs-section">
             <span className="docs-kicker">06 / BUILD WITH AI</span><h2>Create AAL with a coding agent</h2>
-            <p>The <a href="https://github.com/graphen-studio/graphen/blob/main/skills/aal-architecture/SKILL.md" target="_blank" rel="noopener noreferrer">AAL architecture skill <ExternalLink size={14} aria-hidden="true" /></a> guides coding agents through modeling components, checking references, and drawing the intended topology in a valid <code>.aal.yaml</code> file. It includes a complete starting example and points to the project schema for the latest rules.</p>
-            <p>Give your agent the skill file or add the <code>skills/aal-architecture/</code> folder to the skills location supported by your agent tool, then describe the architecture you want. Skill installation and discovery depend on the tool you use. You can paste the resulting YAML into the <a href={`${base}studio/`}>Studio</a> to inspect it visually.</p>
+            <p>The AAL architecture skill guides coding agents through modeling components, checking references, and drawing the intended topology in a valid <code>.aal.yaml</code> file. Give the skill content to your coding agent, describe the architecture you want, then paste the resulting YAML into the <a href={`${base}studio/`}>Studio</a> to inspect it visually.</p>
+            <SkillBlock />
+            <p className="docs-skill-github">Also available on <a href="https://github.com/graphen-studio/graphen/blob/main/skills/aal-architecture/SKILL.md" target="_blank" rel="noopener noreferrer">GitHub <ExternalLink size={13} aria-hidden="true" /></a>. Skill installation and automatic discovery depend on the agent tool you use.</p>
           </section>
           <footer className="docs-footer"><span>Graphen · Agent Architecture Language</span><a href={base}>Back to Graphen ↑</a></footer>
         </main>
