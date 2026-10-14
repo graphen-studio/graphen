@@ -102,10 +102,10 @@ const references: { id: string; title: string; intro: string; fields: Field[]; e
     fields: [
       { name: 'from', type: 'string', required: true, description: 'ID of an agent, MCP, memory, tool, guardrail, or logic component.' },
       { name: 'to', type: 'string', required: true, description: 'ID of an agent, MCP, memory, tool, guardrail, or logic component.' },
-      { name: 'label', type: 'string', description: 'Optional text for the connection.' },
+      { name: 'label', type: 'string', description: 'Optional text for the connection. Supports multiline text: use the YAML literal block scalar (|-) or \\n inside a quoted string.' },
     ],
-    example: 'topology:\n  - from: specialist\n    to: customer_mcp\n    label: Queries customer data',
-    note: 'Model and group IDs are not valid topology endpoints. References such as agents.tools do not automatically create edges; add topology entries to draw them.',
+    example: 'topology:\n  - from: specialist\n    to: customer_mcp\n    label: Queries customer data\n  - from: orchestrator\n    to: specialist\n    label: |-\n      Delegates to\n      specialist agent',
+    note: 'Model and group IDs are not valid topology endpoints. References such as agents.tools do not automatically create edges; add topology entries to draw them. The label supports multiline text: use the |- block scalar in YAML or \\n inside a quoted string (e.g. "line one\\nline two").',
   },
 ]
 

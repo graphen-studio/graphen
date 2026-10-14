@@ -1,4 +1,4 @@
-import { BaseEdge, getBezierPath, useInternalNode, type EdgeProps } from '@xyflow/react'
+import { BaseEdge, EdgeLabelRenderer, getBezierPath, useInternalNode, type EdgeProps } from '@xyflow/react'
 import { getFloatingEdgeParams } from './floatingEdgeUtils'
 
 export function ParticleEdge({
@@ -45,20 +45,23 @@ export function ParticleEdge({
     targetPosition: tp,
   })
 
+  const labelStr = typeof label === 'string' ? label : undefined
+
   return (
     <>
-      <BaseEdge
-        id={id}
-        path={path}
-        style={style}
-        label={label}
-        labelX={labelX}
-        labelY={labelY}
-        labelStyle={{ fill: 'var(--accent)', fontSize: 11, fontWeight: 600 }}
-        labelBgStyle={{ fill: 'var(--panel)', stroke: 'var(--border)', strokeWidth: 1 }}
-        labelBgPadding={[12, 7]}
-        labelBgBorderRadius={7}
-      />
+      <BaseEdge id={id} path={path} style={style} />
+      {labelStr && (
+        <EdgeLabelRenderer>
+          <div
+            className="edge-label-renderer"
+            style={{
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+            }}
+          >
+            {labelStr}
+          </div>
+        </EdgeLabelRenderer>
+      )}
       <circle className="edge-particle" r="3" fill="var(--accent)">
         <animateMotion dur="3s" repeatCount="indefinite" path={path} />
       </circle>

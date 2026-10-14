@@ -715,6 +715,21 @@ button:focus-visible {
   font-size: 13px;
 }
 
+.edge-label-renderer {
+  position: absolute;
+  pointer-events: all;
+  padding: 4px 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: pre-line;
+  text-align: center;
+  line-height: 1.5;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .edge-particle {
     display: none;
