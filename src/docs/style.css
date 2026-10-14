@@ -148,7 +148,24 @@
 .docs-example { margin: 22px 0; border: 1px solid #323b51; border-radius: 10px; }
 .docs-example summary { padding: 14px 19px; color: #d7e4fc; cursor: pointer; }
 .docs-example .docs-code { margin: 0; border: 0; border-top: 1px solid #323b51; border-radius: 0 0 10px 10px; box-shadow: none; }
+
+.docs-skill-block { margin: 22px 0; border: 1px solid #323b51; border-radius: 10px; }
+.docs-skill-block > summary { display: flex; align-items: center; gap: 16px; padding: 14px 19px; color: #d7e4fc; font-weight: 600; cursor: pointer; list-style: none; }
+.docs-skill-block > summary::-webkit-details-marker { display: none; }
+.docs-skill-block > summary::before { content: '▶'; font-size: 10px; color: #7b8eb8; transition: transform .2s ease; flex: none; }
+.docs-skill-block[open] > summary::before { transform: rotate(90deg); }
+.docs-skill-hint { color: #7b8eb8; font-size: 12px; font-weight: 400; }
+.docs-skill-body { border-top: 1px solid #323b51; }
+.docs-skill-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #181e2e; border-radius: 0; }
+.docs-skill-filename { font-family: 'Geist Mono', 'Fira Code', monospace; font-size: 11px; color: #7b8eb8; }
+.docs-skill-copy { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; background: #252e43; border: 1px solid #3a4560; border-radius: 6px; color: #d7e4fc; font-size: 12px; font-weight: 500; cursor: pointer; transition: background .15s; }
+.docs-skill-copy:hover { background: #2e3a56; }
+.docs-skill-content { margin: 0; padding: 20px; font-family: 'Geist Mono', 'Fira Code', monospace; font-size: 12.5px; line-height: 1.7; color: #c9d6f0; background: #12141c; border-radius: 0 0 10px 10px; white-space: pre-wrap; word-break: break-word; max-height: 480px; overflow-y: auto; }
+.docs-skill-github { margin-top: 14px; font-size: 13px; color: #7b8eb8; }
+.docs-skill-github a { color: #8eaef2; }
+
 .docs-footer { display: flex; justify-content: space-between; gap: 20px; padding: 32px 0 52px; border-top: 1px solid #ffffff12; color: #929caf; font-size: 12px; }
+
 
 @media (max-width: 850px) {
   .docs-layout { display: block; }
