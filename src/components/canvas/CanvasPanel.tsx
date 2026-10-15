@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Background, ConnectionMode, Controls, ReactFlow, ReactFlowProvider, useEdgesState, useNodesState } from '@xyflow/react'
 import type { Edge, Node, NodeChange, ReactFlowInstance } from '@xyflow/react'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, PanelLeftClose, PanelLeftOpen, RotateCcw } from 'lucide-react'
@@ -39,6 +39,31 @@ function getPositionsStorageKey(docName: string, direction: string): string {
   return `graphen-positions:${docName}:${direction}`
 }
 
+function getCollapsedStorageKey(docName: string): string {
+  return `graphen-collapsed:${docName}`
+}
+
+function loadCollapsedGroups(key: string): Set<string> {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? new Set(JSON.parse(raw) as string[]) : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+function saveCollapsedGroups(key: string, collapsed: Set<string>) {
+  try {
+    if (collapsed.size === 0) {
+      localStorage.removeItem(key)
+    } else {
+      localStorage.setItem(key, JSON.stringify([...collapsed]))
+    }
+  } catch {
+    // Ignore localStorage errors
+  }
+}
+
 function loadStoredLayout(key: string): StoredLayout {
   try {
     const raw = localStorage.getItem(key)
@@ -64,6 +89,7 @@ type CanvasContentProps = {
   document: AalDocument
   direction: (typeof directions)[number]['value']
   storageKey: string
+  collapsedStorageKey: string
   theme: 'dark' | 'light'
   setSelectedId: (id: string | null) => void
   onInit: (instance: ReactFlowInstance) => void
@@ -75,6 +101,7 @@ function FlowCanvas({
   document,
   direction,
   storageKey,
+  collapsedStorageKey,
   setSelectedId,
   onInit,
   onPositionsChange,
@@ -82,6 +109,9 @@ function FlowCanvas({
 }: CanvasContentProps) {
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null)
   const graph = useMemo(() => transformAalToGraph(document, direction), [document, direction])
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
+    () => loadCollapsedGroups(collapsedStorageKey)
+  )
 
   const initialNodes = useMemo(() => {
     const stored = loadStoredLayout(storageKey)
@@ -138,14 +168,52 @@ function FlowCanvas({
     setEdges(graph.edges)
   }, [graph, storageKey, setNodes, setEdges])
 
-  // Attach onResizeEnd callback to group nodes data to guarantee persistence
+  // Collapsed group dimensions — match the standard component node size
+  const COLLAPSED_WIDTH = 240
+  const COLLAPSED_HEIGHT = 116
+
+  const handleToggleCollapse = useCallback((groupId: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev)
+      if (next.has(groupId)) {
+        next.delete(groupId)
+      } else {
+        next.add(groupId)
+      }
+      saveCollapsedGroups(collapsedStorageKey, next)
+      return next
+    })
+  }, [collapsedStorageKey])
+
+  // Attach onResizeEnd and onToggleCollapse callbacks to group nodes; hide children of collapsed groups
   const nodesWithCallbacks = useMemo(() => {
+    // Pre-compute child counts per group
+    const childCounts = new Map<string, number>()
+    for (const n of nodes) {
+      if (n.parentId) childCounts.set(n.parentId, (childCounts.get(n.parentId) ?? 0) + 1)
+    }
+
     return nodes.map((node) => {
+      // Hide children of collapsed groups
+      if (node.type !== 'group' && node.parentId && collapsedGroups.has(node.parentId)) {
+        return { ...node, hidden: true }
+      }
+
       if (node.type !== 'group') return node
+
+      const isCollapsed = collapsedGroups.has(node.id)
+
       return {
         ...node,
+        // Override size when collapsed so the node shrinks to a compact card
+        ...(isCollapsed
+          ? { width: COLLAPSED_WIDTH, height: COLLAPSED_HEIGHT, style: { ...node.style, width: COLLAPSED_WIDTH, height: COLLAPSED_HEIGHT } }
+          : {}),
         data: {
           ...node.data,
+          collapsed: isCollapsed,
+          childCount: childCounts.get(node.id) ?? 0,
+          onToggleCollapse: () => handleToggleCollapse(node.id),
           onResizeEnd: (params: { width: number; height: number; x: number; y: number }) => {
             const width = Math.round(params.width)
             const height = Math.round(params.height)
@@ -179,7 +247,24 @@ function FlowCanvas({
         },
       }
     })
-  }, [nodes, storageKey, setNodes, onPositionsChange])
+  }, [nodes, storageKey, collapsedGroups, setNodes, onPositionsChange, handleToggleCollapse])
+
+  // Redirect edges: when source/target is a hidden child, point to its parent group instead
+  const edgesWithCollapse = useMemo(() => {
+    // Build a map of nodeId -> parentId for quick lookup
+    const parentMap = new Map<string, string>()
+    for (const n of nodes) {
+      if (n.parentId) parentMap.set(n.id, n.parentId)
+    }
+    return edges.map((edge) => {
+      const sourceParent = parentMap.get(edge.source)
+      const targetParent = parentMap.get(edge.target)
+      const newSource = (sourceParent && collapsedGroups.has(sourceParent)) ? sourceParent : edge.source
+      const newTarget = (targetParent && collapsedGroups.has(targetParent)) ? targetParent : edge.target
+      if (newSource === newTarget) return { ...edge, hidden: true }
+      return { ...edge, source: newSource, target: newTarget, hidden: false }
+    })
+  }, [edges, nodes, collapsedGroups])
 
   // Handle position and dimension changes and save without causing full rerenders
   const handleNodesChange = (changes: NodeChange<Node>[]) => {
@@ -223,7 +308,7 @@ function FlowCanvas({
   return (
     <ReactFlow<Node, Edge>
       nodes={nodesWithCallbacks}
-      edges={edges}
+      edges={edgesWithCollapse}
       onNodesChange={handleNodesChange}
       onEdgesChange={onEdgesChange}
       connectionMode={ConnectionMode.Loose}
@@ -263,6 +348,7 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
   const storageKey = sharedLayoutScope
     ? `graphen-shared-positions:${sharedLayoutScope}:${document.metadata.name}:${direction}`
     : getPositionsStorageKey(document.metadata.name, direction)
+  const collapsedStorageKey = getCollapsedStorageKey(document.metadata.name)
 
   const [hasCustomPositions, setHasCustomPositions] = useState(() => {
     return Object.keys(loadStoredLayout(storageKey)).length > 0
@@ -360,6 +446,7 @@ export function CanvasPanel({ document, status, editorVisible, onToggleEditor }:
             document={document}
             direction={direction}
             storageKey={storageKey}
+            collapsedStorageKey={collapsedStorageKey}
             theme={theme}
             setSelectedId={(id) => { if (id === null) setSelectedNode(null) }}
             onInit={(instance) => { flowRef.current = instance }}

@@ -717,6 +717,8 @@ button:focus-visible {
 
 .edge-label-renderer {
   position: absolute;
+  /* Grouped-node edges are elevated by React Flow; keep labels above them. */
+  z-index: 1001;
   pointer-events: all;
   padding: 4px 10px;
   background: var(--panel);
