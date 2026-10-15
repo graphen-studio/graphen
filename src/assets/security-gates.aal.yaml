@@ -113,6 +113,9 @@ topology:
   - from: processor
     to: audit_log
     label: "Records activity"
+  - from: processor
+    to: high_value_check
+    label: "Check transaction value"
   - from: high_value_check
     to: require_approval
     label: "If amount > $10k"
