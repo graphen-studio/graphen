@@ -17,9 +17,8 @@
   <a href="https://react.dev/"><img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black"></a>
   <a href="https://vite.dev/"><img alt="Vite" src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white"></a>
   <a href="https://graphen-studio.github.io/graphen/studio/"><img alt="Live Studio" src="https://img.shields.io/badge/demo-Live%20Studio-059669?style=flat-square"></a>
+  <a href="https://hub.xerj.org/contributors/pavanad"><img alt="XERJ Corpus Hub contributor" src="https://hub.xerj.org/contributors/pavanad/badge.svg"></a>
 </p>
-
----
 
 ## Overview
 
